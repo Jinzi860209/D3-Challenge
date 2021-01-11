@@ -42,6 +42,17 @@ function xScale(DataCsv, chosenXAxis) {
   
   }
 
+ //Function for Updating y-scale Variable
+function yScale(DataCsv, chosenYAxis) {
+    var yLinearScale = d3.scaleLinear()
+    .domain([d3.min(DataCsv, d => d[chosenYAxis] * 0.8),
+        d3.max(DataCsv, d=> d[chosenYAxis] * 1.0)
+    ])
+    .range([width, 0]);
+
+return yLinearScale;
+} 
+
   // function used for updating xAxis var upon click on axis label
 function renderAxes(newXScale, xAxis) {
     var bottomAxis = d3.axisBottom(newXScale);
@@ -53,7 +64,18 @@ function renderAxes(newXScale, xAxis) {
     return xAxis;
   }
 
-  // function used for updating circles group with a transition to
+//Function for Updating yAxis
+function renderyAxes(newYScale, yAxis) {
+    var leftAxis = d3.axisLeft(newYScale);
+
+    yAxis.transition()
+        .duration(1000)
+        .call(leftAxis);
+
+    return yAxis
+}
+
+// function used for updating circles group with a transition to
 // new circles
 function renderCircles(circlesGroup, newXScale, chosenXAxis) {
 
@@ -63,3 +85,42 @@ function renderCircles(circlesGroup, newXScale, chosenXAxis) {
   
     return circlesGroup;
   }
+
+//Function for Updating Circles on yAxis
+function renderyCircles(circlesGroup, newYScale, chosenYAxis) {
+
+    circlesGroup.transition()
+        .duration(1000)
+        .attr("cy", d => newYScale(d[chosenYAxis]));
+          
+    return circlesGroup;
+}
+
+// // Function for Updating Tooltip
+ function updateToolTip(chosenXAxis, circlesGroup) {
+     if (chosenXAxis === "healthcare") {
+         var label = "Healthcare (%)";
+     }
+    else {
+var label = "Obesity (%)";
+     }
+
+     var toolTip = d3.tip()
+     .attr("class", "d3-tip")
+     .offset([80, -60])
+     .html(function(d) {
+       return (`${d.state}<br>${label} ${d[chosenXAxis]}`);
+     });
+
+ circlesGroup.call(toolTip);
+
+   circlesGroup.on("mouseover", function(data) {
+     toolTip.show(data);
+   })
+     // onmouseout event
+     .on("mouseout", function(data, index) {  
+       toolTip.hide(data);
+     });
+
+   return circlesGroup;
+ }
